@@ -34,7 +34,7 @@ Ansible to configure Ubuntu Bastion Server
 * Add AWS Login to Cron Job
 
 ## License
-Config is Copyright © 2015-2021 Codica. It is released under the [MIT License](https://opensource.org/licenses/MIT).
+Configs is Copyright © 2015-2021 Codica. It is released under the [MIT License](https://opensource.org/licenses/MIT).
 
 ## About Codica
 
