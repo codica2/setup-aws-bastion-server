@@ -1,0 +1,9 @@
+---
+- name: Setup Server
+  hosts: all
+  become: yes
+  vars_files:
+    - /home/ivankarpenko/devops/ansible/setup-aws-bastion-server/setup/roles/only-setup-server/vars/main.yml
+
+  roles:
+    - only-setup-server

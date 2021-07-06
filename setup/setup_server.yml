@@ -1,0 +1,9 @@
+---
+- name: Setup Server & Register Gitlab Runner
+  hosts: all
+  become: yes
+  vars_files:
+    - /home/ivankarpenko/devops/ansible/setup-aws-bastion-server/setup/roles/setup-server/vars/main.yml
+
+  roles:
+    - setup-server

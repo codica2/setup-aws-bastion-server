@@ -1,0 +1,77 @@
+---
+# Setup Server
+- name: Install Docker
+  block:
+
+    # Update System
+
+    - name: Update System
+      apt:
+        update_cache: true
+        cache_valid_time: 86400
+
+    # Install Docker and Docker-Compose
+
+    - name: Install Docker Packages
+      apt:
+        name:
+          - apt-transport-https
+          - ca-certificates
+          - curl
+          - software-properties-common
+        state: present
+      tags:
+        - docker
+
+    - name: Add Docker's official GPG key
+      apt_key:
+        url: https://download.docker.com/linux/ubuntu/gpg
+        state: present
+      tags:
+        - docker
+
+    - name: Verify that we have the key with the fingerprint
+      apt_key:
+        id: 0EBFCD88
+        state: present
+      tags:
+        - docker
+
+    - name: Set up the Stable Repository
+      apt_repository:
+        repo: >
+          deb [arch=amd64]
+          https://download.docker.com/linux/ubuntu xenial stable
+        state: present
+        update_cache: true
+      tags:
+        - docker
+
+    - name: Update System
+      apt:
+        update_cache: true
+      tags:
+        - docker
+
+    - name: Install Docker
+      apt:
+        name: docker-ce
+        state: present
+        update_cache: true
+      tags:
+        - docker
+
+    - name: Add remote user to docker group
+      user:
+        name: "{{ ansible_user }}"
+        groups: docker
+        append: true
+      tags:
+        - docker
+
+    - name: Install Docker-Compose
+      get_url:
+        url: >
+          https://github.com/docker/compose/releases/download/1.25.1-rc1/docker-compose-Linux-x86_64
+        dest: /usr/local/bin/docker-compose
+        mode: "u+x,g+x"

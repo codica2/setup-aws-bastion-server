@@ -1,0 +1,7 @@
+---
+- name: restart_gitlab_runner
+  service: 
+    name: gitlab-runner
+    state: restarted
+  become: true
+  when: ansible_os_family == "RedHat"

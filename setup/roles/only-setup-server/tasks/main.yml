@@ -1,0 +1,154 @@
+---
+# Setup Server
+- name: Setup Server
+  block:
+
+    # Install Gitlab Runner
+
+    - name: Get Gitlab repository installation script
+      get_url:
+        url: https://packages.gitlab.com/install/repositories/runner/gitlab-runner/script.deb.sh
+        dest: /tmp/gitlab-runner.script.deb.sh
+        mode: 0744
+
+    - name: Install Gitlab repository
+      command: >
+        bash /tmp/gitlab-runner.script.deb.sh
+      args:
+        creates: /etc/apt/sources.list.d/runner_gitlab-runner.list
+
+    - name: Set gitlab_runner_package_name
+      set_fact:
+        gitlab_runner_package: gitlab-runner
+        gitlab_runner_package_state: latest
+      when: gitlab_runner_package_version is not defined
+
+    - name: Add Docker's official GPG key
+      apt_key:
+        url: https://download.docker.com/linux/ubuntu/gpg
+        state: present
+      tags:
+        - docker
+
+    - name: Verify that we have the key with the fingerprint
+      apt_key:
+        id: 0EBFCD88
+        state: present
+      tags:
+        - docker
+
+    - name: Set up the Stable Repository
+      apt_repository:
+        repo: deb [arch=amd64] https://download.docker.com/linux/ubuntu xenial stable
+        state: present
+      tags:
+        - docker
+
+    - name: Update System
+      apt:
+        update_cache: true
+        cache_valid_time: 86400
+
+    # Install Docker and Docker-Compose
+    - name: Install Docker Packages
+      apt:
+        name:
+          - apt-transport-https
+          - ca-certificates
+          - curl
+          - software-properties-common
+          - docker-ce
+          - gitlab-runner
+        state: present
+      tags:
+        - docker
+
+    - name: Add remote user to docker group
+      user:
+        name: "{{ ansible_user }}"
+        group: docker
+        append: true
+      tags:
+        - docker
+
+    - name: Install Docker-Compose
+      get_url:
+        url: https://github.com/docker/compose/releases/download/1.25.1-rc1/docker-compose-Linux-x86_64
+        dest: /usr/local/bin/docker-compose
+        mode: 755
+
+    # Install Docker Machine
+
+    - name: Check for docker-machine binary.
+      stat:
+        path: /usr/local/bin/docker_machine
+        follow: true
+      register: dm_binary
+
+    - name: Check for docker-machine bash completion.
+      stat:
+        path: /etc/bash_completion.d/docker
+      register: dm_bash_completion
+
+    - name: Check for docker-machine bash completion.
+      get_url:
+        url: https://raw.githubusercontent.com/docker/docker-ce/master/components/cli/contrib/completion/bash/docker
+        dest: /etc/bash_completion.d/docker
+        owner: root
+        group: root
+        mode: 0644
+      when: not dm_bash_completion.stat.exists|bool
+
+    - name: Download docker-machine binary.
+      get_url:
+        url: https://github.com/docker/machine/releases/download/v0.16.1/docker-machine-{{ ansible_system }}-{{ ansible_machine }}
+        dest: /usr/local/bin/docker-machine
+        owner: root
+        group: root
+        mode: 0755
+      when: not dm_binary.stat.exists|bool
+
+    # Install AWS CLI
+
+    - name: Install AWS CLI
+      apt:
+        name: awscli
+        state: latest
+      tags:
+        - awscli
+
+    # AWS Configure
+
+    - name: Set Access Key
+      command: >
+        aws configure set aws_access_key_id "{{ aws_access_key }}"
+
+    - name: Set Secret Key
+      command: >
+        aws configure set aws_secret_access_key "{{ aws_secret_key }}"
+
+    # Aws Login
+    - name: AWS Login
+      shell: >
+        RESULT=$(aws ecr get-login --no-include-email --region {{ aws_region }})
+        && echo $RESULT
+      register: RESULT
+
+    # Print ECR login creds
+    - debug:
+        var:
+          RESULT.stdout_lines
+
+    # AWS Cron Login
+    - name: Creates AWS Login Cronjob
+      cron:
+        name: "AWS Login"
+        minute: "*"
+        hour: "*/6"
+        weekday: "*"
+        user: root
+        job: >
+          RESULT=$(aws ecr get-login --no-include-email --region
+          {{ aws_region }}) && $RESULT >/dev/null 2>&1
+      tags:
+        - cronjobs

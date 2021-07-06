@@ -1,0 +1,79 @@
+---
+# Setup Server
+- name: Register Gitlab Runner
+  block:
+
+    # Update System
+
+    - name: Update System
+      apt:
+        update_cache: true
+        cache_valid_time: 86400
+    # Registering Gitlab Runners
+
+    - name: List Configured Runners
+      command: >
+        gitlab-ci-multi-runner list
+      register: configured_runners
+      changed_when: false
+
+    - name: remove config.toml file
+      file:
+        path: "{{ gitlab_runner_config_file }}"
+        state: absent
+      become: "{{ gitlab_runner_system_mode }}"
+
+    - name: Create .gitlab-runner dir
+      file:
+        path: "{{ gitlab_runner_config_file_location }}"
+        state: directory
+        mode: "0755"
+      become: "{{ gitlab_runner_system_mode }}"
+
+    - name: Register runner to GitLab
+      command: >
+        gitlab-runner register
+        --non-interactive
+        --url '{{ gitlab_runner_coordinator_url }}'
+        --registration-token '{{ gitlab_runner_registration_token }}'
+        --description '{{ gitlab_runner_name }}'
+        --tag-list ''
+        --executor '{{ gitlab_runner_executor|default("docker+machine") }}'
+        --limit '{{ gitlab_runner_limit }}'
+        --docker-image '{{ gitlab_runner_docker_image }}'
+        --cache-s3-server-address '{{ gitlab_runner_s3_server_address|default("s3.amazonaws.com") }}'
+        --cache-s3-access-key '{{ gitlab_runner_s3_access_key }}'
+        --cache-s3-secret-key '{{ gitlab_runner_s3_secret_key }}'
+        --cache-s3-bucket-name '{{ gitlab_runner_s3_bucket_name }}'
+        --cache-s3-bucket-location '{{ gitlab_runner_s3_bucket_location }}'
+        --docker-volumes '{{ gitlab_runner_docker_volume }}'
+        --docker-disable-cache='{{ gitlab_runner_docker_cache }}'
+        --docker-privileged='{{ gitlab_runner_docker_privileged }}'
+        --machine-idle-nodes '{{ gitlab_runner_idle_nodes }}'
+        --machine-idle-time '{{ gitlab_runner_idle_time }}'
+        --machine-max-builds '{{ gitlab_runner_max_builds }}'
+        --machine-machine-driver '{{ gitlab_runner_driver }}'
+        --machine-machine-name '{{ gitlab_runner_machine_name }}'
+        --machine-machine-options '{{ gitlab_runner_amazonec2_access_key }}'
+        --machine-machine-options '{{ gitlab_runner_amazonec2_secret_key }}'
+        --machine-machine-options '{{ gitlab_runner_amazonec2_region }}'
+        --machine-machine-options '{{ gitlab_runner_amazonec2_vpc }}'
+        --machine-machine-options '{{ gitlab_runner_amazonec2_subnet }}'
+        --machine-machine-options '{{ gitlab_runner_amazonec2_zone }}'
+        --machine-machine-options '{{ gitlab_runner_amazonec2_tags }}'
+        --machine-machine-options '{{ gitlab_runner_amazonec2_security_group }}'
+        --machine-machine-options '{{ gitlab_runner_amazonec2_instance_type }}'
+        --machine-machine-options '{{ gitlab_runner_amazonec2_spot_instance }}'
+        --machine-machine-options '{{ gitlab_runner_amazonec2_spot_price }}'
+        --machine-off-peak-periods '{{ gitlab_runner_off_peak_periods }}'
+        --machine-off-peak-timezone '{{ gitlab_runner_off_peak_timezone }}'
+        --machine-off-peak-idle-count '{{ gitlab_runner_off_peak_idlecount}}'
+        --machine-off-peak-idle-time '{{ gitlab_runner_off_peak_idletime }}'
+        --run-untagged='true'
+        --locked='false'
+        --access-level 'not_protected'
+      when: configured_runners.stdout.find("{{ gitlab_runner_name }}") == -1
+
+    - name: Restart Gitlab Runner
+      command: >
+        gitlab-runner restart

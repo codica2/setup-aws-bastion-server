@@ -1,0 +1,9 @@
+---
+- name: Install & Confugre AWS CLI
+  hosts: all
+  become: yes
+  vars_files:
+    - /home/ivankarpenko/devops/ansible/setup-aws-bastion-server/setup/roles/aws-cli-install/vars/main.yml
+
+  roles:
+    - aws-cli-install

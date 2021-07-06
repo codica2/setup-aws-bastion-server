@@ -1,0 +1,5 @@
+---
+#AWS
+aws_access_key: 123
+aws_secret_key: 123
+aws_region: eu-central-1

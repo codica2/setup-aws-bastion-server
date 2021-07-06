@@ -1,0 +1,41 @@
+---
+# Setup Server
+- name: Setup AWS
+  block:
+
+    # Update apt cache
+
+    - name: Update apt cache
+      apt:
+        update_cache: true
+        cache_valid_time: 86400
+
+    # Install AWS CLI
+
+    - name: Install AWS CLI
+      apt:
+        name: awscli
+        state: latest
+      tags:
+        - awscli
+
+    # AWS Configure
+
+    - name: Set Access Key
+      command: >
+        aws configure set aws_access_key_id '{{ aws_access_key }}'
+
+    - name: Set Secret Key
+      command: >
+        aws configure set aws_secret_access_key '{{ aws_secret_key }}'
+
+    # Aws Login
+    - name: AWS Login
+      shell: >
+        RESULT=$(aws ecr get-login --no-include-email --region {{ aws_region }})
+        && echo $RESULT
+      register: RESULT
+    # Print ECR login creds
+    - debug:
+        var:
+          RESULT.stdout_lines

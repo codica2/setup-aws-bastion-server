@@ -1,0 +1,47 @@
+---
+# Setup Server
+- name: Install Docker Machine
+  block:
+
+    # Update System
+
+    - name: Update System
+      apt:
+        update_cache: true
+        cache_valid_time: 86400
+
+    # Install Docker Machine
+
+    - name: Check for docker-machine binary.
+      stat:
+        path: /usr/local/bin/docker_machine
+        follow: true
+      register: dm_binary
+
+    - name: Download ca-certificates
+      apt:
+        name: ca-certificates
+        state: present
+
+    - name: Download docker-machine binary.
+      get_url:
+        url: https://github.com/docker/machine/releases/download/v0.16.1/docker-machine-{{ ansible_system }}-{{ ansible_machine }}
+        dest: /usr/local/bin/docker-machine
+        owner: root
+        group: root
+        mode: 0755
+      when: not dm_binary.stat.exists|bool
+
+    - name: Check for docker-machine bash completion.
+      stat:
+        path: /etc/bash_completion.d/docker
+      register: dm_bash_completion
+
+    - name: Check for docker-machine bash completion.
+      get_url:
+        url: https://raw.githubusercontent.com/docker/docker-ce/master/components/cli/contrib/completion/bash/docker
+        dest: /etc/bash_completion.d/docker
+        owner: root
+        group: root
+        mode: 0644
+      when: not dm_bash_completion.stat.exists|bool

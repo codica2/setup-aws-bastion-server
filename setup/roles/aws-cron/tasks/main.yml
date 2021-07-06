@@ -1,0 +1,25 @@
+---
+# Setup Server
+- name: Add CronJob
+  block:
+
+    # Update System
+
+    - name: Update System
+      apt:
+        update_cache: true
+        cache_valid_time: 86400
+
+    # AWS Cron Login
+    - name: Creates AWS Login Cronjob
+      cron:
+        name: "AWS Login"
+        minute: "*"
+        hour: "*/6"
+        weekday: "*"
+        user: root
+        job: >
+          RESULT=$(aws ecr get-login --no-include-email --region
+          {{ aws_region }}) && $RESULT >/dev/null 2>&1
+      tags:
+        - cronjobs

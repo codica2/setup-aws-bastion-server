@@ -1,0 +1,46 @@
+---
+# Gitlab
+gitlab_runner_system_mode: yes
+gitlab_runner_config_file: /etc/gitlab-runner/config.toml
+gitlab_runner_config_file_location: "{{ gitlab_runner_config_file | dirname }}"
+# Gitlab Register
+# gitlab_runner_token: ""
+gitlab_runner_name: name
+gitlab_runner_state: present
+gitlab_runner_coordinator_url: https://gitlab.com/
+gitlab_runner_registration_token: 
+gitlab_runner_executor: docker+machine
+gitlab_runner_docker_image: alpine:latest
+gitlab_runner_limit: 2
+gitlab_runner_s3_server_address: s3.amazonaws.com
+gitlab_runner_s3_access_key: 123
+gitlab_runner_s3_secret_key: 
+gitlab_runner_s3_bucket_name: 123
+gitlab_runner_s3_bucket_location: "eu-central-1"
+gitlab_runner_docker_volume: /var/run/docker.sock:/var/run/docker.sock, /cache
+gitlab_runner_docker_volume2: /var/run/docker.sock:/var/run/docker.sock, /cache
+gitlab_runner_docker_cache: true
+gitlab_runner_docker_privileged: true
+gitlab_runner_idle_nodes: 1
+gitlab_runner_idle_time: 1800
+gitlab_runner_max_builds: 100
+gitlab_runner_driver: "amazonec2"
+gitlab_runner_machine_name: "gitlab-docker-machine-%s"
+gitlab_runner_amazonec2_access_key: amazonec2-access-key=123
+gitlab_runner_amazonec2_secret_key: amazonec2-secret-key=123
+gitlab_runner_amazonec2_region: amazonec2-region=eu-central-1
+gitlab_runner_amazonec2_vpc: amazonec2-vpc-id=123
+gitlab_runner_amazonec2_subnet: amazonec2-subnet-id=123
+gitlab_runner_amazonec2_zone: amazonec2-zone=a
+gitlab_runner_amazonec2_tags: amazonec2-tags=runner-manager-name,gitlab-aws-autoscaler,gitlab,true,gitlab-runner-autoscale,true
+gitlab_runner_amazonec2_security_group: amazonec2-security-group=123
+gitlab_runner_amazonec2_instance_type: amazonec2-instance-type=t3.medium
+gitlab_runner_amazonec2_spot_instance: amazonec2-request-spot-instance=true
+gitlab_runner_amazonec2_spot_price: amazonec2-spot-price=0.04
+gitlab_runner_off_peak_periods: "123"
+gitlab_runner_off_peak_timezone: "Europe/Kiev"
+gitlab_runner_off_peak_idlecount: "0"
+gitlab_runner_off_peak_idletime: "1200"
+aws_access_key: 123
+aws_secret_key: 123
+aws_region: eu-central-1

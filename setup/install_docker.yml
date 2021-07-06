@@ -1,0 +1,10 @@
+---
+- name: Install Docker & Docker Compose
+  hosts: all
+  become: yes
+  vars_files:
+    - /home/ivankarpenko/devops/ansible/setup-aws-bastion-server/setup/roles/docker-install/vars/main.yml
+
+  roles:
+    - docker-install
+    

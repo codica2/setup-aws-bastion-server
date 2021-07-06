@@ -1,0 +1,5 @@
+---
+#Gitlab
+gitlab_runner_system_mode: yes
+gitlab_runner_config_file: /etc/gitlab-runner/config.toml
+gitlab_runner_config_file_location: "{{ gitlab_runner_config_file | dirname }}"
